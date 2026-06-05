@@ -54,12 +54,13 @@ RUN --mount=type=secret,id=github_token,uid=1000,required=false \
     mise install "node@${NODE_VERSION}" && \
     mise use -g --pin "node@${NODE_VERSION}"
 
-# pnpm via corepack — the version pinned here is overridden at runtime
-# by the project's `packageManager` field if present.
-RUN . ~/.profile && \
-    corepack enable && \
-    corepack prepare "pnpm@${PNPM_VERSION}" --activate && \
-    pnpm --version
+# pnpm via mise (consistent with node). At runtime, projects with a
+# `packageManager` field in package.json will use that pinned version
+# instead (pnpm self-bootstraps to the requested release).
+RUN --mount=type=secret,id=github_token,uid=1000,required=false \
+    GITHUB_TOKEN=$(cat /run/secrets/github_token 2>/dev/null || true) \
+    mise install "pnpm@${PNPM_VERSION}" && \
+    mise use -g --pin "pnpm@${PNPM_VERSION}"
 
 # Playwright chromium for client e2e. System deps installed above; using
 # `--with-deps` would re-invoke apt as root and fight cache mounts.
