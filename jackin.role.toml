@@ -16,6 +16,7 @@ plugins = [
   "claude-md-management@claude-plugins-official",
   "security-guidance@claude-plugins-official",
   "pr-review-toolkit@claude-plugins-official",
+  "superpowers@claude-plugins-official",
   "caveman@caveman",
 ]
 
@@ -29,6 +30,9 @@ source = "JuliusBrussee/caveman"
 [opencode]
 
 [kimi]
+
+[hooks]
+preflight = "hooks/preflight.sh"
 
 [env.CLAUDE_CODE_NO_FLICKER]
 default = "1"
