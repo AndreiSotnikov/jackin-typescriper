@@ -12,6 +12,7 @@ ARG PLAYWRIGHT_VERSION=1.49.0
 ARG TESSL_VERSION=0.82.0
 ARG CAVEMAN_VERSION=1.8.2
 ARG CAVEMEM_VERSION=0.2.1
+ARG XENOVA_TRANSFORMERS_VERSION=2.17.2
 
 # System packages:
 # - build-essential, libssl-dev, pkg-config: native node-gyp deps (argon2, bcrypt, etc.)
@@ -98,13 +99,16 @@ RUN . ~/.profile && \
 # cavemem: cross-agent persistent memory (SQLite + MCP). Wire hooks for
 # claude/opencode/codex (amp + kimi unsupported by cavemem installer).
 # SQLite store lives at ~/.cavemem — mount at runtime to persist across container rebuilds.
+# @xenova/transformers is an optional dep cavemem loads for local embeddings;
+# install it into the same global node_modules so cavemem can require() it.
 RUN --mount=type=cache,target=/home/agent/.npm,uid=1000 \
     . ~/.profile && \
-    npm i -g "cavemem@${CAVEMEM_VERSION}" && \
+    npm i -g "cavemem@${CAVEMEM_VERSION}" "@xenova/transformers@${XENOVA_TRANSFORMERS_VERSION}" && \
     cavemem install && \
     cavemem install --ide opencode && \
     cavemem install --ide codex && \
-    cavemem --version
+    cavemem --version && \
+    node -e "require('@xenova/transformers')"
 
 # Smoke tests fail the build fast if any tool is broken.
 RUN . ~/.profile && \
