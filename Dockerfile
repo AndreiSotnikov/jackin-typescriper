@@ -108,7 +108,7 @@ RUN --mount=type=cache,target=/home/agent/.npm,uid=1000 \
     cavemem install --ide opencode && \
     cavemem install --ide codex && \
     cavemem --version && \
-    node -e "require('@xenova/transformers')"
+    NODE_PATH="$(npm root -g)" node -e "require('@xenova/transformers')"
 
 # Smoke tests fail the build fast if any tool is broken.
 RUN . ~/.profile && \
