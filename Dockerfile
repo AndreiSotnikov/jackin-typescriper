@@ -110,6 +110,14 @@ RUN --mount=type=cache,target=/home/agent/.npm,uid=1000 \
     cavemem --version && \
     NODE_PATH="$(npm root -g)" node -e "require('@xenova/transformers')"
 
+# jackin runs the container as the host UID (not the image's 1000), then its
+# entrypoint copies /jackin/default-home -> $HOME. Any agent-authored file that
+# isn't world-readable makes that copy fail with EACCES and the agent never
+# starts (the session drops immediately). The caveman/cavemem installers write
+# ~/.claude/settings.json as 0640, unreadable by the host UID; widen the tree so
+# the entrypoint can read it (matches the agent-smith role's world-readable home).
+RUN chmod -R a+rX "${HOME}/.claude"
+
 # Smoke tests fail the build fast if any tool is broken.
 RUN . ~/.profile && \
     node --version && \
